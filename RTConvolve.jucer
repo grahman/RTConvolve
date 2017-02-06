@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="NA30hd" name="RTConvolve" projectType="audioplug" version="1.0.0"
+              bundleIdentifier="com.grahambarab.RTConvolve" includeBinaryInAppConfig="1"
+              buildVST="1" buildVST3="0" buildAU="1" buildAUv3="0" buildRTAS="0"
+              buildAAX="0" pluginName="RTConvolve" pluginDesc="RTConvolve"
+              pluginManufacturer="Graham Barab" pluginManufacturerCode="Gmbp"
+              pluginCode="Na30" pluginChannelConfigs="" pluginIsSynth="0" pluginWantsMidiIn="0"
+              pluginProducesMidiOut="0" pluginIsMidiEffectPlugin="0" pluginEditorRequiresKeys="0"
+              pluginAUExportPrefix="RTConvolveAU" pluginRTASCategory="" aaxIdentifier="com.yourcompany.RTConvolve"
+              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="4.2.1"
+              companyName="Graham Barab" companyEmail="gbarab@mac.com">
+  <MAINGROUP id="DVarFc" name="RTConvolve">
+    <GROUP id="{8AB72BF0-87C2-C06B-9A1E-813F344409E9}" name="Source">
+      <FILE id="DwJiq8" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="Source/PluginProcessor.cpp"/>
+      <FILE id="Kg1bVJ" name="PluginProcessor.h" compile="0" resource="0"
+            file="Source/PluginProcessor.h"/>
+      <FILE id="sI2t2M" name="PluginEditor.cpp" compile="1" resource="0"
+            file="Source/PluginEditor.cpp"/>
+      <FILE id="qQ8NU9" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <EXPORTFORMATS>
+    <XCODE_MAC targetFolder="Builds/MacOSX">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="RTConvolve"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="RTConvolve"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="../../src/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../src/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../src/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../src/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../src/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../src/JUCE/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../src/JUCE/modules"/>
+        <MODULEPATH id="juce_video" path="../../src/JUCE/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../src/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../src/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../src/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../src/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../src/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../src/JUCE/modules"/>
+      </MODULEPATHS>
+    </XCODE_MAC>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_video" showAllCode="1" useLocalCopy="0"/>
+  </MODULES>
+  <JUCEOPTIONS JUCE_QUICKTIME="disabled"/>
+</JUCERPROJECT>
