@@ -18,8 +18,7 @@ class UPConvolver
 public:
     UPConvolver(FLOAT_TYPE *impulseResponse, int numSamples, int bufferSize, int maxPartitions);
     
-    void bufferInput(FLOAT_TYPE *input);
-    void process();
+    void processInput(FLOAT_TYPE *input);
     
     const FLOAT_TYPE *getOutputBuffer() const { return mOutputReal->getReadPointer(0); };
     
@@ -38,6 +37,9 @@ private:
     int mNumPartitions;
     
     int mCurrentInputSegment;
+    
+    void process();
+
 };
 
 #include "UniformPartitionConvolver.hpp"

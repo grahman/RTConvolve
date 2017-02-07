@@ -14,11 +14,12 @@ int isPowerOfTwo (unsigned int x)
 }
 
 
-void checkNull(void *x)
+void* checkNull(void *x)
 {
     if (x == nullptr)
     {
         std::cerr << "Error: could not allocate memory" << std::endl;
         throw std::exception();
     }
+    return x;
 }

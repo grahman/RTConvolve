@@ -22,5 +22,15 @@ INT_TYPE trueMod(INT_TYPE x, INT_TYPE m)
     return ( (x >= 0) ? (x % m) : (m + (x % m)) );
 }
 
-void checkNull(void *x);
+template <typename T>
+T *throwIfNull(T *x)
+{
+    if (x == nullptr)
+    {
+        std::cerr << "Error: could not allocate memory" << std::endl;
+        throw std::exception();
+    }
+    return x;
+}
+void *checkNull(void *x);
 #endif /* util_hpp */

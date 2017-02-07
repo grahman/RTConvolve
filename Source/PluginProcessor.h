@@ -13,6 +13,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "UniformPartitionConvolver.h"
+#include "TimeDistributedFFTConvolver.h"
 
 //==============================================================================
 /**

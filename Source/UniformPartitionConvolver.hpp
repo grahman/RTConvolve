@@ -73,7 +73,7 @@ UPConvolver<FLOAT_TYPE>::UPConvolver(FLOAT_TYPE *impulseResponse, int numSamples
 }
 
 template <typename FLOAT_TYPE>
-void UPConvolver<FLOAT_TYPE>::bufferInput(FLOAT_TYPE *input)
+void UPConvolver<FLOAT_TYPE>::processInput(FLOAT_TYPE *input)
 {
     FLOAT_TYPE *currentSegmentReal = mInputReal[mCurrentInputSegment]->getWritePointer(0);
     FLOAT_TYPE *currentSegmentImag = mInputImag[mCurrentInputSegment]->getWritePointer(0);
@@ -82,7 +82,11 @@ void UPConvolver<FLOAT_TYPE>::bufferInput(FLOAT_TYPE *input)
     mInputImag[mCurrentInputSegment]->clear();
     
     memcpy(currentSegmentReal, input, mBufferSize * sizeof(FLOAT_TYPE));
+    fft(currentSegmentReal, currentSegmentImag, 2 * mBufferSize);
+    
+    process();
 }
+
 
 template <typename FLOAT_TYPE>
 void UPConvolver<FLOAT_TYPE>::process()
@@ -92,11 +96,6 @@ void UPConvolver<FLOAT_TYPE>::process()
     
     FLOAT_TYPE *rey = mOutputReal->getWritePointer(0);
     FLOAT_TYPE *imy = mOutputImag->getWritePointer(0);
-    
-    FLOAT_TYPE *rex0 = mInputReal[mCurrentInputSegment]->getWritePointer(0);
-    FLOAT_TYPE *imx0 = mInputImag[mCurrentInputSegment]->getWritePointer(0);
-    
-    fft(rex0, imx0, 2 * mBufferSize);
     
     for (int j = 0; j < mNumPartitions; ++j)
     {
@@ -115,7 +114,6 @@ void UPConvolver<FLOAT_TYPE>::process()
     }
     
     ifft(rey, imy, 2 * mBufferSize);
-    
     FLOAT_TYPE *tail = mPreviousOutputTail->getWritePointer(0);
     
     for (int i = 0; i < mBufferSize; ++i)

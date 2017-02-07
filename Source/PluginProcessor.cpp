@@ -130,8 +130,7 @@ void RtconvolveAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         float* channelData = buffer.getWritePointer (channel);
-        mUniformConvolver[channel]->bufferInput(channelData);
-        mUniformConvolver[channel]->process();
+        mUniformConvolver[channel]->processInput(channelData);
         const float* y = mUniformConvolver[channel]->getOutputBuffer();
         
         memcpy(channelData, y, buffer.getNumSamples() * sizeof(float));

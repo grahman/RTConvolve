@@ -1,5 +1,8 @@
 /* Adapted from Stephen Smith's algorithm (www.dspguide.com) */
 
+#ifndef __FFT__
+#define __FFT__
+
 /* Fast Fourier Transform */
 #ifdef _WIN32
 #define _USE_MATH_DEFINES
@@ -89,3 +92,4 @@ void ifft(T *REX, T *IMX, unsigned int N)
 		IMX[i] = -1 * IMX[i] / N;
 	}
 }
+#endif
