@@ -24,8 +24,8 @@ public:
         mUniformConvolver = new UPConvolver<FLOAT_TYPE>(impulseResponse, numSamples, mBufferSize, 8);
         checkNull(mUniformConvolver);
         
-        FLOAT_TYPE *subIR = impulseResponse + (0 * mBufferSize);
-        int subNumSamples = numSamples - (0 * mBufferSize);
+        FLOAT_TYPE *subIR = impulseResponse + (8 * mBufferSize);
+        int subNumSamples = numSamples - (8 * mBufferSize);
         
         mTimeDistributedConvolver = new TimeDistributedFFTConvolver<FLOAT_TYPE>(subIR, subNumSamples, mBufferSize);
         checkNull(mTimeDistributedConvolver);
@@ -45,8 +45,8 @@ public:
         /* Prepare output */
         for (int i = 0; i < mBufferSize; ++i)
         {
-//            output[i] = out1[i] + out2[i];
-            output[i] = out2[i];
+            output[i] = out1[i] + out2[i];
+//            output[i] = out2[i];
         }
     }
     
