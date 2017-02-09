@@ -42,4 +42,12 @@ void genSincFilter(FLOAT_TYPE *x, int N, FLOAT_TYPE normalizedCutoff)
     }
 }
 
+template <typename FLOAT_TYPE>
+void genImpulse(FLOAT_TYPE *x, int N)
+{
+    x[0] = 1.0;
+    
+    for (int i = 1; i < N; ++i) { x[i] = 0; }
+}
+
 #endif /* SincFilter_hpp */

@@ -12,9 +12,13 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 
 template <typename FLOAT_TYPE>
-class RefCountedAudioBuffer: public juce::AudioBuffer<FLOAT_TYPE>, juce::ReferenceCountedObject
+class RefCountedAudioBuffer: public juce::AudioBuffer<FLOAT_TYPE>, public juce::ReferenceCountedObject
 {
-    
+public:
+    RefCountedAudioBuffer(int numChannels, int size)
+    : juce::AudioBuffer<FLOAT_TYPE>(numChannels, size)
+    {
+    }
 };
 
 template <typename FLOAT_TYPE>
@@ -32,6 +36,11 @@ public:
     
     TimeDistributedFFTConvolver(FLOAT_TYPE *impulseResponse, int numSamplesImpulseResponse, int bufferSize);
     void processInput(FLOAT_TYPE *input);
+    const FLOAT_TYPE *getOutputBuffer() const
+    {
+        int startIndex = mCurrentPhase * mNumSamplesBaseTimePeriod;
+        return mOutputReal->getReadPointer(0) + startIndex;
+    }
     
 private:
     int mNumSamplesBaseTimePeriod;
@@ -60,7 +69,7 @@ private:
     void performConvolutions(int subArray, int whichHalf);
     void promoteBuffers();
     void prepareOutput();
-    void bufferTail();
+    void fft_priv(FLOAT_TYPE *rex, FLOAT_TYPE *imx, FLOAT_TYPE *trx, FLOAT_TYPE *tix, int N);
 };
 
 #include "TimeDistributedFFTConvolver.hpp"

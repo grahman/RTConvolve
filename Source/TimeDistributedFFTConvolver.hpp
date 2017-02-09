@@ -17,8 +17,8 @@ static const float NTWOPI = -2.0 * M_PI;
 
 template <typename FLOAT_TYPE>
 TimeDistributedFFTConvolver<FLOAT_TYPE>::TimeDistributedFFTConvolver(FLOAT_TYPE *impulseResponse, int numSamplesImpulseResponse, int bufferSize)
- : mCurrentInputIndex(0)
- , mCurrentPhase(kPhase3)
+ : mCurrentPhase(kPhase3)
+ , mCurrentInputIndex(0)
 {
     mNumSamplesBaseTimePeriod = bufferSize;
     
@@ -52,8 +52,19 @@ TimeDistributedFFTConvolver<FLOAT_TYPE>::TimeDistributedFFTConvolver(FLOAT_TYPE 
         mImpulsePartitionsImag[i]->clear();
         FLOAT_TYPE *partitionImag = mImpulsePartitionsImag[i]->getWritePointer(0);
         
+        FLOAT_TYPE *tempReal = new FLOAT_TYPE[2 * partitionSize];
+        checkNull(tempReal);
+        memset(tempReal, 0, 2 * partitionSize * sizeof(FLOAT_TYPE));
+        
+        FLOAT_TYPE *tempImag = new FLOAT_TYPE[2 * partitionSize];
+        checkNull(tempImag);
+        memset(tempImag, 0, 2 * partitionSize * sizeof(FLOAT_TYPE));
+        
         /* Calculate transform */
-        fft(partition, partitionImag, 2 * partitionSize);
+        fft_priv(partition, partitionImag, tempReal, tempImag, 2 * partitionSize);
+        
+        delete [] tempReal;
+        delete [] tempImag;
         
         /* Allocate an input buffer */
         mInputReal.add(new juce::AudioBuffer<FLOAT_TYPE>(1, 2 * partitionSize));
@@ -62,12 +73,16 @@ TimeDistributedFFTConvolver<FLOAT_TYPE>::TimeDistributedFFTConvolver(FLOAT_TYPE 
         mInputImag[i]->clear();
     }
     
-    mTempReal = new juce::AudioBuffer<FLOAT_TYPE>(1, 2 * partitionSize);
-    checkNull(mTempReal);
-    mTempReal->clear();
-    mTempImag = new juce::AudioBuffer<FLOAT_TYPE>(1, 2 * partitionSize);
-    checkNull(mTempImag);
-    mTempReal->clear();
+    for (int i = 0; i < 3; ++i)
+    {
+        mTempReal[i] = ReferenceCountedObjectPtr<RefCountedAudioBuffer<FLOAT_TYPE> >(new RefCountedAudioBuffer<FLOAT_TYPE>(1, 2 * partitionSize));
+        checkNull(mTempReal[0]);
+        mTempReal[i]->clear();
+        mTempImag[i] = ReferenceCountedObjectPtr<RefCountedAudioBuffer<FLOAT_TYPE> >(new RefCountedAudioBuffer<FLOAT_TYPE>(1, 2 * partitionSize));
+        checkNull(mTempImag[0]);
+        mTempImag[i]->clear();
+    }
+    
     
     mOutputReal = new juce::AudioBuffer<FLOAT_TYPE>(1, 2 * partitionSize);
     checkNull(mOutputReal);
@@ -92,7 +107,7 @@ TimeDistributedFFTConvolver<FLOAT_TYPE>::TimeDistributedFFTConvolver(FLOAT_TYPE 
     
     mPreviousTail = new juce::AudioBuffer<FLOAT_TYPE>(1, partitionSize);
     checkNull(mPreviousTail);
-    
+    mPreviousTail->clear();
 }
 
 template <typename FLOAT_TYPE>
@@ -100,14 +115,21 @@ void TimeDistributedFFTConvolver<FLOAT_TYPE>::processInput(FLOAT_TYPE *input)
 {
     ReferenceCountedObjectPtr<RefCountedAudioBuffer<FLOAT_TYPE> > temp;
     int partitionSize = 4 * mNumSamplesBaseTimePeriod;
-    int N4 = partitionSize >> 1;    /* 1/4 of FFT size */
-    int Q = mCurrentPhase * N4;
+    mCurrentPhase = trueMod((mCurrentPhase + 1), 4);
+    int Q = mCurrentPhase * mNumSamplesBaseTimePeriod;
     
     switch (mCurrentPhase)
     {
     case kPhase0:
         {
+            promoteBuffers();
+
             /* Buffer 'C' */
+            mBuffersReal[2]->clear();
+            mBuffersImag[2]->clear();
+            mTempReal[2]->clear();
+            mTempImag[2]->clear();
+            
             FLOAT_TYPE *cr = mBuffersReal[2]->getWritePointer(0);
             memcpy(cr + Q, input, mNumSamplesBaseTimePeriod * sizeof(FLOAT_TYPE));
             
@@ -141,8 +163,6 @@ void TimeDistributedFFTConvolver<FLOAT_TYPE>::processInput(FLOAT_TYPE *input)
             inverseDecomposition(ar, ai, tr, ti, 2 * partitionSize, 0);
             
             prepareOutput();
-            bufferTail();
-            
             break;
         }
         case kPhase1:
@@ -172,7 +192,6 @@ void TimeDistributedFFTConvolver<FLOAT_TYPE>::processInput(FLOAT_TYPE *input)
             inverseDecomposition(ar, ai, tr, ti, 2 * partitionSize, 1);
             
             prepareOutput();
-            bufferTail();
             break;
         }
         case kPhase2:
@@ -190,8 +209,12 @@ void TimeDistributedFFTConvolver<FLOAT_TYPE>::processInput(FLOAT_TYPE *input)
             /* Buffer 'B' */
             FLOAT_TYPE *br = mBuffersReal[1]->getWritePointer(0);
             FLOAT_TYPE *bi = mBuffersImag[1]->getWritePointer(0);
-            
+            FLOAT_TYPE *rex0 = mInputReal[mCurrentInputIndex]->getWritePointer(0);
+            FLOAT_TYPE *imx0 = mInputImag[mCurrentInputIndex]->getWritePointer(0);
+
             fft(br + partitionSize, bi + partitionSize, partitionSize);
+            memcpy(rex0 + partitionSize, br + partitionSize, partitionSize * sizeof(FLOAT_TYPE));
+            memcpy(imx0 + partitionSize, bi + partitionSize, partitionSize * sizeof(FLOAT_TYPE));
             performConvolutions(1, 0);
             
             /* Buffer 'A' */
@@ -203,8 +226,6 @@ void TimeDistributedFFTConvolver<FLOAT_TYPE>::processInput(FLOAT_TYPE *input)
             inverseDecomposition(ar, ai, tr, ti, 2 * partitionSize, 2);
             
             prepareOutput();
-            bufferTail();
-            
             break;
         }
         case kPhase3:
@@ -223,7 +244,7 @@ void TimeDistributedFFTConvolver<FLOAT_TYPE>::processInput(FLOAT_TYPE *input)
             FLOAT_TYPE *br = mBuffersReal[1]->getWritePointer(0);
             FLOAT_TYPE *bi = mBuffersImag[1]->getWritePointer(0);
             performConvolutions(1, 1);
-            ifft(br + partitionSize, bi + partitionSize, partitionSize);    /* Y(2k) sub-ifft */
+            ifft(br + partitionSize, bi + partitionSize, partitionSize);    /* Y(2k+1) sub-ifft */
             
             /* Buffer 'A' */
             FLOAT_TYPE *ar = mBuffersReal[0]->getWritePointer(0);
@@ -234,8 +255,6 @@ void TimeDistributedFFTConvolver<FLOAT_TYPE>::processInput(FLOAT_TYPE *input)
             inverseDecomposition(ar, ai, tr, ti, 2 * partitionSize, 3);
             
             prepareOutput();
-            bufferTail();
-            
             break;
         }
     }
@@ -247,31 +266,14 @@ void TimeDistributedFFTConvolver<FLOAT_TYPE>::prepareOutput()
     FLOAT_TYPE *out = mOutputReal->getWritePointer(0);
     FLOAT_TYPE *ar = mBuffersReal[0]->getWritePointer(0);
     FLOAT_TYPE *tail = mPreviousTail->getWritePointer(0);
+    int partitionSize = 4 * mNumSamplesBaseTimePeriod;
     int startIndex = mCurrentPhase * mNumSamplesBaseTimePeriod;
     
     for (int i = 0; i < mNumSamplesBaseTimePeriod; ++i)
     {
         int j = startIndex + i;
         out[j] = ar[j] + tail[j];
-        
-        
-    }
-}
-
-template <typename FLOAT_TYPE>
-void TimeDistributedFFTConvolver<FLOAT_TYPE>::bufferTail()
-{
-    FLOAT_TYPE *tail = mPreviousTail->getWritePointer(0);
-    int startIndex = mCurrentPhase * mNumSamplesBaseTimePeriod;
-    int partitionSize = 4 * mNumSamplesBaseTimePeriod;
-    FLOAT_TYPE *out = mOutputReal->getWritePointer(0);
-
-    for (int i = 0; i < mNumSamplesBaseTimePeriod; ++i)
-    {
-        int j = startIndex + i;
-        int k = j + partitionSize;
-        
-        tail[j] = out[k];
+        tail[j] = ar[j + partitionSize];
     }
 }
 
@@ -287,6 +289,18 @@ void TimeDistributedFFTConvolver<FLOAT_TYPE>::promoteBuffers()
     mBuffersImag[0] = mBuffersImag[1];
     mBuffersImag[1] = mBuffersImag[2];
     mBuffersImag[2] = temp;
+    
+    temp = mTempReal[0];
+    mTempReal[0] = mTempReal[1];
+    mTempReal[1] = mTempReal[2];
+    mTempReal[2] = temp;
+    
+    temp = mTempImag[0];
+    mTempImag[0] = mTempImag[1];
+    mTempImag[1] = mTempImag[2];
+    mTempImag[2] = temp;
+    
+    mCurrentInputIndex = trueMod((mCurrentInputIndex + 1), mNumPartitions);
 }
 
 
@@ -366,10 +380,17 @@ void TimeDistributedFFTConvolver<FLOAT_TYPE>::inverseDecomposition(FLOAT_TYPE *r
     for (int i = 0; i < N8; ++i)
     {
         int j = i + Q;
+        float frac = j / (float)N;
+        float twr = cos(TWOPI * frac);
+        float twi = sin(TWOPI * frac);
+        FLOAT_TYPE rea = re[j];
+        FLOAT_TYPE ima = im[j];
+        FLOAT_TYPE reb = (re[j + N2] * twr) - (im[j + N2] * twi);
+        FLOAT_TYPE imb = (re[j + N2] * twi) + (im[j + N2] * twr);
         tr[j] = re[j];
         ti[j] = im[j];
-        re[j] = (re[j] + re[j + N2]) * 0.5;
-        im[j] = (im[j] + im[j + N2]) * 0.5;
+        re[j] = (rea + reb) * 0.5;
+        im[j] = (ima + imb) * 0.5;
     }
     
     /* Odd half decomposition */
@@ -377,14 +398,16 @@ void TimeDistributedFFTConvolver<FLOAT_TYPE>::inverseDecomposition(FLOAT_TYPE *r
     {
         int j = i + Q;
         float frac = j / (float)N;
-        float zr = cos(TWOPI * frac);
-        float zi = sin(TWOPI * frac);
-        
-        tr[N2 + j] = (tr[j] - re[N2 + j]);
-        ti[N2 + j] = (ti[j] - im[N2 + j]);
-        
-        re[N2 + j] = ((tr[N2 + j] * zr) - (ti[N2 + j] * zi)) * 0.5;
-        im[N2 + j] = ((tr[N2 + j] * zi) + (ti[N2 + j] * zr)) * 0.5;
+        float twr = cos(TWOPI * frac);
+        float twi = sin(TWOPI * frac);
+        FLOAT_TYPE rea = tr[j];
+        FLOAT_TYPE ima = ti[j];
+        FLOAT_TYPE reb = (re[j + N2] * twr) - (im[j + N2] * twi);
+        FLOAT_TYPE imb = (re[j + N2] * twi) + (im[j + N2] * twr);
+        tr[j] = re[j];
+        ti[j] = im[j];
+        re[j+N2] = (rea - reb) * 0.5;
+        im[j+N2] = (ima - imb) * 0.5;
     }
 }
 
@@ -406,17 +429,17 @@ void TimeDistributedFFTConvolver<FLOAT_TYPE>::performConvolutions(int subArray, 
     FLOAT_TYPE *rex = nullptr;
     FLOAT_TYPE *imx = nullptr;
     
-    FLOAT_TYPE rey = mBuffersReal[1]->getWritePointer(0) + startIndex;
-    FLOAT_TYPE imy = mBuffersImag[1]->getWritePointer(0) + startIndex;
-    FLOAT_TYPE reh = nullptr;
-    FLOAT_TYPE imh = nullptr;
+    FLOAT_TYPE *rey = mBuffersReal[1]->getWritePointer(0) + startIndex;
+    FLOAT_TYPE *imy = mBuffersImag[1]->getWritePointer(0) + startIndex;
+    FLOAT_TYPE *reh = nullptr;
+    FLOAT_TYPE *imh = nullptr;
     
     memset(rey, 0, N * sizeof(FLOAT_TYPE));
     memset(imy, 0, N * sizeof(FLOAT_TYPE));
     
     for (int i = 0; i < mNumPartitions; ++i)
     {
-        int k = trueMod((mCurrentInputIndex - i + 1), mNumPartitions);
+        int k = trueMod((mCurrentInputIndex - i), mNumPartitions);
        
         rex = mInputReal[k]->getWritePointer(0) + startIndex;
         imx = mInputImag[k]->getWritePointer(0) + startIndex;
@@ -425,10 +448,24 @@ void TimeDistributedFFTConvolver<FLOAT_TYPE>::performConvolutions(int subArray, 
 
         for (int j = 0; j < N; ++j)
         {
-            rey[i] += (rex[i] * reh[i]) - (imx[i] * imh[i]);
-            imy[i] += (rex[i] * imh[i]) + (imx[i] * reh[i]);
+            rey[j] += (rex[j] * reh[j]) - (imx[j] * imh[j]);
+            imy[j] += (rex[j] * imh[j]) + (imx[j] * reh[j]);
         }
     }
+}
+
+/**
+ This function computes the FFT with the frequency domain bins arranged in
+ the specific order needed for the frequency domain convolutions 
+ */
+template <typename FLOAT_TYPE>
+void TimeDistributedFFTConvolver<FLOAT_TYPE>::fft_priv(FLOAT_TYPE *rex, FLOAT_TYPE *imx, FLOAT_TYPE *trx, FLOAT_TYPE *tix, int N)
+{
+    forwardDecompositionComplete(rex, imx, trx, tix, N);
+    int N2 = N >> 1;
+    
+    fft(rex, imx, N2);
+    fft(rex+N2, imx+N2, N2);
 }
 
 

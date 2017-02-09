@@ -13,7 +13,7 @@
 #include "util/SincFilter.hpp"
 #include "util/util.h"
 
-static const int SFLTR_SIZE = 128;
+static const int SFLTR_SIZE = 32;
 //==============================================================================
 RtconvolveAudioProcessor::RtconvolveAudioProcessor()
 {
@@ -81,11 +81,24 @@ void RtconvolveAudioProcessor::changeProgramName (int index, const String& newNa
 void RtconvolveAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     juce::ScopedPointer<float> sincFilter = new float[SFLTR_SIZE * samplesPerBlock];
+    juce::ScopedPointer<float> impulse = new float[SFLTR_SIZE * samplesPerBlock];
+
     checkNull(sincFilter);
+    checkNull(impulse);
 
     genSincFilter((float*)sincFilter, SFLTR_SIZE * samplesPerBlock, 0.01f);
-    mUniformConvolver[0] = new UPConvolver<float>(sincFilter, SFLTR_SIZE * samplesPerBlock, samplesPerBlock, 200);
-    mUniformConvolver[1] = new UPConvolver<float>(sincFilter, SFLTR_SIZE * samplesPerBlock, samplesPerBlock, 200);
+    genImpulse((float *)impulse, SFLTR_SIZE * samplesPerBlock);
+    mUniformConvolver[0] = new UPConvolver<float>(impulse, SFLTR_SIZE * samplesPerBlock, samplesPerBlock, 200);
+    mUniformConvolver[1] = new UPConvolver<float>(impulse, SFLTR_SIZE * samplesPerBlock, samplesPerBlock, 200);
+    
+    mConvolutionManager[0] = new ConvolutionManager<float>(impulse, SFLTR_SIZE * samplesPerBlock, samplesPerBlock);
+    mConvolutionManager[1] = new ConvolutionManager<float>(impulse, SFLTR_SIZE * samplesPerBlock, samplesPerBlock);
+//    mUniformConvolver[0] = new UPConvolver<float>(sincFilter, SFLTR_SIZE * samplesPerBlock, samplesPerBlock, 200);
+//    mUniformConvolver[1] = new UPConvolver<float>(sincFilter, SFLTR_SIZE * samplesPerBlock, samplesPerBlock, 200);
+//    
+//    mConvolutionManager[0] = new ConvolutionManager<float>(sincFilter, SFLTR_SIZE * samplesPerBlock, samplesPerBlock);
+//    mConvolutionManager[1] = new ConvolutionManager<float>(sincFilter, SFLTR_SIZE * samplesPerBlock, samplesPerBlock);
+    
 }
 
 void RtconvolveAudioProcessor::releaseResources()
@@ -126,7 +139,16 @@ void RtconvolveAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
 
     for (int i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
-
+    
+    for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    {
+        float* channelData = buffer.getWritePointer (channel);
+        mConvolutionManager[channel]->processInput(channelData);
+        const float* y = mConvolutionManager[channel]->getOutputBuffer();
+        memcpy(channelData, y, buffer.getNumSamples() * sizeof(float));
+    }
+    
+    /* Below is good -------------
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         float* channelData = buffer.getWritePointer (channel);
@@ -135,6 +157,7 @@ void RtconvolveAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
         
         memcpy(channelData, y, buffer.getNumSamples() * sizeof(float));
     }
+     -----------------------------*/
 }
 
 //==============================================================================

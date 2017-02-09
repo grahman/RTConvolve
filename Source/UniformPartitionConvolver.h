@@ -20,7 +20,10 @@ public:
     
     void processInput(FLOAT_TYPE *input);
     
-    const FLOAT_TYPE *getOutputBuffer() const { return mOutputReal->getReadPointer(0); };
+    const FLOAT_TYPE *getOutputBuffer() const
+    {
+        return mOutputReal->getReadPointer(0);
+    };
     
 private:
     juce::OwnedArray<juce::AudioBuffer<FLOAT_TYPE> > mImpulsePartitionsReal;

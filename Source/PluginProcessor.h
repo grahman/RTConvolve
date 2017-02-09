@@ -14,6 +14,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "UniformPartitionConvolver.h"
 #include "TimeDistributedFFTConvolver.h"
+#include "ConvolutionManager.h"
 
 //==============================================================================
 /**
@@ -59,6 +60,7 @@ public:
 
 private:
     juce::ScopedPointer<UPConvolver<float> > mUniformConvolver[2];
+    juce::ScopedPointer<ConvolutionManager<float> > mConvolutionManager[2];
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RtconvolveAudioProcessor)
 };
