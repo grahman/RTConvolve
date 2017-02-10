@@ -61,8 +61,8 @@ public:
     //================= CUSTOM =======================
     void setImpulseResponse(float *impulseResponse, int numSamples);
 private:
-    juce::ScopedPointer<UPConvolver<float> > mUniformConvolver[2];
-    juce::ScopedPointer<ConvolutionManager<float> > mConvolutionManager[2];
+//    juce::ScopedPointer<ConvolutionManager<float> > mConvolutionManager[2];
+    ConvolutionManager<float> mConvolutionManager[2];
     juce::CriticalSection mLoadingLock;
     float mSampleRate;
     int mBufferSize;

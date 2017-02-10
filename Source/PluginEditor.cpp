@@ -43,7 +43,6 @@ void RtconvolveAudioProcessorEditor::buttonClicked(juce::Button* b)
         formatReader->read(&sampleBuffer, 0, formatReader->lengthInSamples, 0, 1, 0);
         
     }
-//    juce::File result = fchooser.getResult();
 }
 
 //==============================================================================

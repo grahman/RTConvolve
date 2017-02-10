@@ -89,17 +89,19 @@ void RtconvolveAudioProcessor::setImpulseResponse(float *impulseResponse, int nu
 //==============================================================================
 void RtconvolveAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    juce::ScopedPointer<float> sincFilter = new float[SFLTR_SIZE * samplesPerBlock];
-    juce::ScopedPointer<float> impulse = new float[SFLTR_SIZE * samplesPerBlock];
+//    juce::ScopedPointer<float> sincFilter = new float[SFLTR_SIZE * samplesPerBlock];
+//    juce::ScopedPointer<float> impulse = new float[SFLTR_SIZE * samplesPerBlock];
+//
+//    checkNull(sincFilter);
+//    checkNull(impulse);
+//
+//    genSincFilter((float*)sincFilter, SFLTR_SIZE * samplesPerBlock, 0.005f);
+//    genImpulse((float *)impulse, SFLTR_SIZE * samplesPerBlock);
+    mConvolutionManager[0].setBufferSize(samplesPerBlock);
+    mConvolutionManager[1].setBufferSize(samplesPerBlock);
 
-    checkNull(sincFilter);
-    checkNull(impulse);
-
-    genSincFilter((float*)sincFilter, SFLTR_SIZE * samplesPerBlock, 0.005f);
-    genImpulse((float *)impulse, SFLTR_SIZE * samplesPerBlock);
-
-    mConvolutionManager[0] = new ConvolutionManager<float>(impulse, SFLTR_SIZE * samplesPerBlock, samplesPerBlock);
-    mConvolutionManager[1] = new ConvolutionManager<float>(impulse, SFLTR_SIZE * samplesPerBlock, samplesPerBlock);
+//    mConvolutionManager[0] = new ConvolutionManager<float>(impulse, SFLTR_SIZE * samplesPerBlock, samplesPerBlock);
+//    mConvolutionManager[1] = new ConvolutionManager<float>(impulse, SFLTR_SIZE * samplesPerBlock, samplesPerBlock);
 }
 
 void RtconvolveAudioProcessor::releaseResources()
@@ -144,8 +146,8 @@ void RtconvolveAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         float* channelData = buffer.getWritePointer (channel);
-        mConvolutionManager[channel]->processInput(channelData);
-        const float* y = mConvolutionManager[channel]->getOutputBuffer();
+        mConvolutionManager[channel].processInput(channelData);
+        const float* y = mConvolutionManager[channel].getOutputBuffer();
         memcpy(channelData, y, buffer.getNumSamples() * sizeof(float));
     }
     
