@@ -14,15 +14,36 @@
 
 //==============================================================================
 RtconvolveAudioProcessorEditor::RtconvolveAudioProcessorEditor (RtconvolveAudioProcessor& p)
-    : AudioProcessorEditor (&p), processor (p)
+    : AudioProcessorEditor (&p)
+    , processor (p)
+    , mButtonChooseIR("Choose Impulse Response")
 {
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
+
+    mButtonChooseIR.changeWidthToFitText();
     setSize (400, 300);
+    
+
+
 }
 
 RtconvolveAudioProcessorEditor::~RtconvolveAudioProcessorEditor()
 {
+}
+
+void RtconvolveAudioProcessorEditor::buttonClicked(juce::Button* b)
+{
+    FileChooser fchooser("Select Impulse Response");
+    if (fchooser.browseForFileToOpen())
+    {
+        File ir = fchooser.getResult();
+        FileInputStream irInputStream(ir);
+        AudioFormatManager manager;
+        AudioFormatReader* formatReader = manager.createReaderFor(ir);
+        AudioSampleBuffer sampleBuffer(1, formatReader->lengthInSamples);
+        formatReader->read(&sampleBuffer, 0, formatReader->lengthInSamples, 0, 1, 0);
+        
+    }
+//    juce::File result = fchooser.getResult();
 }
 
 //==============================================================================

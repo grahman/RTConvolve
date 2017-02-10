@@ -13,12 +13,12 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
-
+#include "RefCountedAudioBuffer.h"
 
 //==============================================================================
 /**
 */
-class RtconvolveAudioProcessorEditor  : public AudioProcessorEditor
+class RtconvolveAudioProcessorEditor  : public AudioProcessorEditor, public Button::Listener
 {
 public:
     RtconvolveAudioProcessorEditor (RtconvolveAudioProcessor&);
@@ -27,12 +27,13 @@ public:
     //==============================================================================
     void paint (Graphics&) override;
     void resized() override;
-
+    void buttonClicked(juce::Button*) override;
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     RtconvolveAudioProcessor& processor;
-
+    
+    juce::TextButton mButtonChooseIR;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RtconvolveAudioProcessorEditor)
 };
 

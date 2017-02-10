@@ -46,7 +46,6 @@ public:
         for (int i = 0; i < mBufferSize; ++i)
         {
             output[i] = out1[i] + out2[i];
-//            output[i] = out2[i];
         }
     }
     

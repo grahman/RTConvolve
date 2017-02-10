@@ -10,16 +10,7 @@
 #define TimeDistributedFFTConvolver_h
 
 #include "../JuceLibraryCode/JuceHeader.h"
-
-template <typename FLOAT_TYPE>
-class RefCountedAudioBuffer: public juce::AudioBuffer<FLOAT_TYPE>, public juce::ReferenceCountedObject
-{
-public:
-    RefCountedAudioBuffer(int numChannels, int size)
-    : juce::AudioBuffer<FLOAT_TYPE>(numChannels, size)
-    {
-    }
-};
+#include "RefCountedAudioBuffer.h"
 
 template <typename FLOAT_TYPE>
 class TimeDistributedFFTConvolver
@@ -46,8 +37,6 @@ private:
     int mNumSamplesBaseTimePeriod;
     juce::ReferenceCountedObjectPtr<RefCountedAudioBuffer<FLOAT_TYPE> > mBuffersReal[3];
     juce::ReferenceCountedObjectPtr<RefCountedAudioBuffer<FLOAT_TYPE> > mBuffersImag[3];
-    juce::ReferenceCountedObjectPtr<RefCountedAudioBuffer<FLOAT_TYPE> > mTempReal[3];
-    juce::ReferenceCountedObjectPtr<RefCountedAudioBuffer<FLOAT_TYPE> > mTempImag[3];
     juce::OwnedArray<juce::AudioBuffer<FLOAT_TYPE> > mImpulsePartitionsReal;
     juce::OwnedArray<juce::AudioBuffer<FLOAT_TYPE> > mImpulsePartitionsImag;
     juce::OwnedArray<juce::AudioBuffer<FLOAT_TYPE> > mInputReal;
@@ -60,11 +49,10 @@ private:
     int mCurrentPhase;
     int mCurrentInputIndex;
     
-    void forwardDecomposition(FLOAT_TYPE *rex, FLOAT_TYPE *imx, FLOAT_TYPE *tr, FLOAT_TYPE *ti, int N, int whichQuarter);
-    void forwardDecompositionComplete(FLOAT_TYPE *rex, FLOAT_TYPE *imx, FLOAT_TYPE *tr, FLOAT_TYPE *ti, int N);
-
-    void inverseDecomposition(FLOAT_TYPE *rex, FLOAT_TYPE *imx,FLOAT_TYPE *trx, FLOAT_TYPE *tix, int N, int whichQuarter);
-    void inverseDecompositionComplete(FLOAT_TYPE *rex, FLOAT_TYPE *imx,FLOAT_TYPE *trx, FLOAT_TYPE *tix, int N);
+    void forwardDecomposition(FLOAT_TYPE *rex, FLOAT_TYPE *imx, int N, int whichQuarter);
+    void forwardDecompositionComplete(FLOAT_TYPE *rex, FLOAT_TYPE *imx, int N);
+    void inverseDecomposition(FLOAT_TYPE *rex, FLOAT_TYPE *imx, int N, int whichQuarter);
+    void inverseDecompositionComplete(FLOAT_TYPE *rex, FLOAT_TYPE *imx, int N);
     
     void performConvolutions(int subArray, int whichHalf);
     void promoteBuffers();

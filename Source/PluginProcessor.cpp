@@ -13,9 +13,11 @@
 #include "util/SincFilter.hpp"
 #include "util/util.h"
 
-static const int SFLTR_SIZE = 32;
+static const int SFLTR_SIZE = 600;
 //==============================================================================
 RtconvolveAudioProcessor::RtconvolveAudioProcessor()
+ : mSampleRate(0.0)
+ , mBufferSize(0)
 {
     
 }
@@ -77,6 +79,13 @@ void RtconvolveAudioProcessor::changeProgramName (int index, const String& newNa
 {
 }
 
+void RtconvolveAudioProcessor::setImpulseResponse(float *impulseResponse, int numSamples)
+{
+    juce::ScopedLock lock(mLoadingLock);
+    
+    
+}
+
 //==============================================================================
 void RtconvolveAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
@@ -86,19 +95,11 @@ void RtconvolveAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     checkNull(sincFilter);
     checkNull(impulse);
 
-    genSincFilter((float*)sincFilter, SFLTR_SIZE * samplesPerBlock, 0.01f);
+    genSincFilter((float*)sincFilter, SFLTR_SIZE * samplesPerBlock, 0.005f);
     genImpulse((float *)impulse, SFLTR_SIZE * samplesPerBlock);
-    mUniformConvolver[0] = new UPConvolver<float>(impulse, SFLTR_SIZE * samplesPerBlock, samplesPerBlock, 200);
-    mUniformConvolver[1] = new UPConvolver<float>(impulse, SFLTR_SIZE * samplesPerBlock, samplesPerBlock, 200);
-    
+
     mConvolutionManager[0] = new ConvolutionManager<float>(impulse, SFLTR_SIZE * samplesPerBlock, samplesPerBlock);
     mConvolutionManager[1] = new ConvolutionManager<float>(impulse, SFLTR_SIZE * samplesPerBlock, samplesPerBlock);
-//    mUniformConvolver[0] = new UPConvolver<float>(sincFilter, SFLTR_SIZE * samplesPerBlock, samplesPerBlock, 200);
-//    mUniformConvolver[1] = new UPConvolver<float>(sincFilter, SFLTR_SIZE * samplesPerBlock, samplesPerBlock, 200);
-//    
-//    mConvolutionManager[0] = new ConvolutionManager<float>(sincFilter, SFLTR_SIZE * samplesPerBlock, samplesPerBlock);
-//    mConvolutionManager[1] = new ConvolutionManager<float>(sincFilter, SFLTR_SIZE * samplesPerBlock, samplesPerBlock);
-    
 }
 
 void RtconvolveAudioProcessor::releaseResources()
