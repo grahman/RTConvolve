@@ -22,7 +22,12 @@ RtconvolveAudioProcessorEditor::RtconvolveAudioProcessorEditor (RtconvolveAudioP
     mButtonChooseIR.changeWidthToFitText();
     setSize (400, 300);
     
+    Rectangle<int> boundingBox = getBounds();
+    mButtonChooseIR.setBounds(boundingBox);
 
+    addAndMakeVisible(&mButtonChooseIR);
+    
+    mButtonChooseIR.addListener(this);
 
 }
 
@@ -38,10 +43,13 @@ void RtconvolveAudioProcessorEditor::buttonClicked(juce::Button* b)
         File ir = fchooser.getResult();
         FileInputStream irInputStream(ir);
         AudioFormatManager manager;
+        manager.registerBasicFormats();
         AudioFormatReader* formatReader = manager.createReaderFor(ir);
-        AudioSampleBuffer sampleBuffer(1, formatReader->lengthInSamples);
-        formatReader->read(&sampleBuffer, 0, formatReader->lengthInSamples, 0, 1, 0);
+        AudioSampleBuffer sampleBuffer(formatReader->numChannels, formatReader->lengthInSamples);
+        formatReader->read(&sampleBuffer, 0, formatReader->lengthInSamples, 0, 1, 1);
+//        const float *impulseResponse = sampleBuffer.getReadPointer(0);
         
+        processor.setImpulseResponse(sampleBuffer);
     }
 }
 
@@ -52,7 +60,7 @@ void RtconvolveAudioProcessorEditor::paint (Graphics& g)
 
     g.setColour (Colours::black);
     g.setFont (15.0f);
-    g.drawFittedText ("Hello World!", getLocalBounds(), Justification::centred, 1);
+
 }
 
 void RtconvolveAudioProcessorEditor::resized()

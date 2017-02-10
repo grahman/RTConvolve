@@ -59,7 +59,7 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     //================= CUSTOM =======================
-    void setImpulseResponse(float *impulseResponse, int numSamples);
+    void setImpulseResponse(const AudioSampleBuffer& impulseResponseBuffer);
 private:
 //    juce::ScopedPointer<ConvolutionManager<float> > mConvolutionManager[2];
     ConvolutionManager<float> mConvolutionManager[2];

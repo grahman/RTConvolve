@@ -256,9 +256,6 @@ void TimeDistributedFFTConvolver<FLOAT_TYPE>::promoteBuffers()
     mCurrentInputIndex = trueMod((mCurrentInputIndex + 1), mNumPartitions);
 }
 
-
-
-
 template <typename FLOAT_TYPE>
 void TimeDistributedFFTConvolver<FLOAT_TYPE>::forwardDecomposition(FLOAT_TYPE *rex, FLOAT_TYPE *imx, int length, int whichQuarter)
 {
@@ -397,10 +394,4 @@ void TimeDistributedFFTConvolver<FLOAT_TYPE>::fft_priv(FLOAT_TYPE *rex, FLOAT_TY
     fft(rex, imx, N2);
     fft(rex+N2, imx+N2, N2);
 }
-
-
-
-
-
-
 

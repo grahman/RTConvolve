@@ -33,4 +33,44 @@ T *throwIfNull(T *x)
     return x;
 }
 void *checkNull(void *x);
+
+template <typename FLOAT_TYPE>
+FLOAT_TYPE summation(FLOAT_TYPE *x, int N)
+{
+    FLOAT_TYPE sum = 0.0;
+    
+    for (int i = 0; i < N; ++i)
+    {
+        sum += fabs(x[i]);
+    }
+    return sum;
+}
+
+template <typename FLOAT_TYPE>
+void scaleArray(FLOAT_TYPE *x, int N, FLOAT_TYPE amount)
+{
+    for (int i = 0; i < N; ++i)
+    {
+        x[i] *= amount;
+    }
+}
+
+template <typename FLOAT_TYPE>
+void normalizeStereoImpulseResponse(FLOAT_TYPE *left, FLOAT_TYPE* right, int numSamples)
+{
+    FLOAT_TYPE sumL = summation(left, numSamples);
+    FLOAT_TYPE sumR = summation(right, numSamples);
+    
+    FLOAT_TYPE scale = fabs(1.0f/std::max(sumL, sumR));
+    
+    scaleArray(left, numSamples, scale);
+    scaleArray(right, numSamples, scale);
+}
+
+template <typename FLOAT_TYPE>
+void normalizeMonoImpulseResponse(FLOAT_TYPE *x, int numSamples)
+{
+    FLOAT_TYPE sum = fabs(summation(x, numSamples));
+    scaleArray(x, numSamples, (1.0f/sum));
+}
 #endif /* util_hpp */

@@ -15,8 +15,8 @@
 #include "util/util.h"
 #include "util/SincFilter.hpp"
 
-static const int DEFAULT_NUM_SAMPLES = 128;
-static const int DEFAULT_BUFFER_SIZE = 128;
+static const int DEFAULT_NUM_SAMPLES = 1024;
+static const int DEFAULT_BUFFER_SIZE = 1024;
 
 template <typename FLOAT_TYPE>
 class ConvolutionManager
@@ -35,16 +35,17 @@ public:
             FLOAT_TYPE *ir = mImpulseResponse->getWritePointer(0);
             genImpulse(ir, DEFAULT_NUM_SAMPLES);
             
-            init(ir, DEFAULT_NUM_SAMPLES, DEFAULT_BUFFER_SIZE);
+            init(ir, DEFAULT_NUM_SAMPLES);
         }
         else
         {
             mImpulseResponse = new juce::AudioBuffer<FLOAT_TYPE>(1, numSamples);
             checkNull(mImpulseResponse);
+            mImpulseResponse->clear();
             FLOAT_TYPE *ir = mImpulseResponse->getWritePointer(0);
             
             memcpy(ir, impulseResponse, numSamples * sizeof(FLOAT_TYPE));
-            init(ir, numSamples, bufferSize);
+            init(ir, numSamples);
         }
     }
     
@@ -86,17 +87,19 @@ public:
         int numSamples = mImpulseResponse->getNumSamples();
         mBufferSize = bufferSize;
         
-        init(ir, numSamples, bufferSize);
+        init(ir, numSamples);
     }
     
-    void setImpulseResponse(FLOAT_TYPE *impulseResponse, int numSamples)
+    void setImpulseResponse(const FLOAT_TYPE *impulseResponse, int numSamples)
     {
         mImpulseResponse = new juce::AudioBuffer<FLOAT_TYPE>(1, numSamples);
         checkNull(mImpulseResponse);
         
+        mImpulseResponse->clear();
+        
         FLOAT_TYPE *ir = mImpulseResponse->getWritePointer(0);
         memcpy(ir, impulseResponse, numSamples * sizeof(FLOAT_TYPE));
-        init(ir, numSamples, mBufferSize);
+        init(ir, numSamples);
     }
     
 private:
@@ -106,7 +109,7 @@ private:
     juce::ScopedPointer<juce::AudioBuffer<FLOAT_TYPE> > mOutput;
     juce::ScopedPointer<juce::AudioBuffer<FLOAT_TYPE> > mImpulseResponse;
     
-    void init(FLOAT_TYPE *impulseResponse, int numSamples, int bufferSize)
+    void init(FLOAT_TYPE *impulseResponse, int numSamples)
     {
         mUniformConvolver = new UPConvolver<FLOAT_TYPE>(impulseResponse, numSamples, mBufferSize, 8);
         checkNull(mUniformConvolver);
@@ -118,6 +121,10 @@ private:
         {
             mTimeDistributedConvolver = new TimeDistributedFFTConvolver<FLOAT_TYPE>(subIR, subNumSamples, mBufferSize);
             checkNull(mTimeDistributedConvolver);
+        }
+        else
+        {
+            mTimeDistributedConvolver = nullptr;
         }
         
         mOutput = new juce::AudioBuffer<FLOAT_TYPE>(1, mBufferSize);
