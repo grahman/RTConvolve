@@ -12,13 +12,31 @@
               companyName="Graham Barab" companyEmail="gbarab@mac.com">
   <MAINGROUP id="DVarFc" name="RTConvolve">
     <GROUP id="{8AB72BF0-87C2-C06B-9A1E-813F344409E9}" name="Source">
-      <FILE id="DwJiq8" name="PluginProcessor.cpp" compile="1" resource="0"
-            file="Source/PluginProcessor.cpp"/>
-      <FILE id="Kg1bVJ" name="PluginProcessor.h" compile="0" resource="0"
-            file="Source/PluginProcessor.h"/>
+      <GROUP id="{A0087A0F-B078-F58F-1EE3-676B89D2DA76}" name="util">
+        <FILE id="hstJKG" name="fft.hpp" compile="0" resource="0" file="Source/util/fft.hpp"/>
+        <FILE id="O6xgnT" name="SincFilter.hpp" compile="0" resource="0" file="Source/util/SincFilter.hpp"/>
+        <FILE id="ZEk3KV" name="util.cpp" compile="1" resource="0" file="Source/util/util.cpp"/>
+        <FILE id="SohRWh" name="util.h" compile="0" resource="0" file="Source/util/util.h"/>
+      </GROUP>
+      <FILE id="PQt2qa" name="ConvolutionManager.h" compile="0" resource="0"
+            file="Source/ConvolutionManager.h"/>
+      <FILE id="V8ZSXH" name="RefCountedAudioBuffer.h" compile="0" resource="0"
+            file="Source/RefCountedAudioBuffer.h"/>
+      <FILE id="Gyh5bG" name="TimeDistributedFFTConvolver.h" compile="0"
+            resource="0" file="Source/TimeDistributedFFTConvolver.h"/>
+      <FILE id="eXGxAV" name="TimeDistributedFFTConvolver.hpp" compile="0"
+            resource="0" file="Source/TimeDistributedFFTConvolver.hpp"/>
+      <FILE id="snmYen" name="UniformPartitionConvolver.h" compile="0" resource="0"
+            file="Source/UniformPartitionConvolver.h"/>
+      <FILE id="Kxu7wv" name="UniformPartitionConvolver.hpp" compile="0"
+            resource="0" file="Source/UniformPartitionConvolver.hpp"/>
+      <FILE id="qQ8NU9" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
       <FILE id="sI2t2M" name="PluginEditor.cpp" compile="1" resource="0"
             file="Source/PluginEditor.cpp"/>
-      <FILE id="qQ8NU9" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+      <FILE id="Kg1bVJ" name="PluginProcessor.h" compile="0" resource="0"
+            file="Source/PluginProcessor.h"/>
+      <FILE id="DwJiq8" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="Source/PluginProcessor.cpp"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
