@@ -44,12 +44,11 @@ void RtconvolveAudioProcessorEditor::buttonClicked(juce::Button* b)
         FileInputStream irInputStream(ir);
         AudioFormatManager manager;
         manager.registerBasicFormats();
-        AudioFormatReader* formatReader = manager.createReaderFor(ir);
+        juce::ScopedPointer<AudioFormatReader> formatReader = manager.createReaderFor(ir);
         AudioSampleBuffer sampleBuffer(formatReader->numChannels, formatReader->lengthInSamples);
         formatReader->read(&sampleBuffer, 0, formatReader->lengthInSamples, 0, 1, 1);
-//        const float *impulseResponse = sampleBuffer.getReadPointer(0);
         
-        processor.setImpulseResponse(sampleBuffer);
+        processor.setImpulseResponse(sampleBuffer, ir.getFullPathName());
     }
 }
 

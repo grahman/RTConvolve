@@ -61,7 +61,7 @@ void normalizeStereoImpulseResponse(FLOAT_TYPE *left, FLOAT_TYPE* right, int num
     FLOAT_TYPE sumL = summation(left, numSamples);
     FLOAT_TYPE sumR = summation(right, numSamples);
     
-    FLOAT_TYPE scale = fabs(1.0f/std::max(sumL, sumR));
+    FLOAT_TYPE scale = fabs(20.0f/std::max(sumL, sumR));
     
     scaleArray(left, numSamples, scale);
     scaleArray(right, numSamples, scale);
@@ -71,6 +71,6 @@ template <typename FLOAT_TYPE>
 void normalizeMonoImpulseResponse(FLOAT_TYPE *x, int numSamples)
 {
     FLOAT_TYPE sum = fabs(summation(x, numSamples));
-    scaleArray(x, numSamples, (1.0f/sum));
+    scaleArray(x, numSamples, (20.0f/sum));
 }
 #endif /* util_hpp */

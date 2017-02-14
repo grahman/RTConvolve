@@ -13,11 +13,11 @@
 #include "util/SincFilter.hpp"
 #include "util/util.h"
 
-static const int SFLTR_SIZE = 600;
 //==============================================================================
 RtconvolveAudioProcessor::RtconvolveAudioProcessor()
  : mSampleRate(0.0)
  , mBufferSize(0)
+ , mImpulseResponseFilePath("")
 {
     
 }
@@ -79,9 +79,10 @@ void RtconvolveAudioProcessor::changeProgramName (int index, const String& newNa
 {
 }
 
-void RtconvolveAudioProcessor::setImpulseResponse(const AudioSampleBuffer& impulseResponseBuffer)
+void RtconvolveAudioProcessor::setImpulseResponse(const AudioSampleBuffer& impulseResponseBuffer, const juce::String pathToImpulse)
 {
     juce::ScopedLock lock(mLoadingLock);
+    mImpulseResponseFilePath = pathToImpulse;
     AudioSampleBuffer impulseResponse(impulseResponseBuffer);
     
     if (impulseResponseBuffer.getNumChannels() == 2)
@@ -101,18 +102,6 @@ void RtconvolveAudioProcessor::setImpulseResponse(const AudioSampleBuffer& impul
         mConvolutionManager[0].setImpulseResponse(ir, impulseResponse.getNumSamples());
         mConvolutionManager[1].setImpulseResponse(ir, impulseResponse.getNumSamples());
     }
-    
-//    for (int i = 0; i < std::min(2, impulseResponseBuffer.getNumChannels()); ++i)
-//    {
-//        const float *impulseResponse = impulseResponseBuffer.getReadPointer(0);
-//        mConvolutionManager[i].setImpulseResponse(impulseResponse, impulseResponseBuffer.getNumSamples());
-////        float *sincfilter = new float[numSamples];
-////        genSincFilter(sincfilter, numSamples, 0.01f);
-//    }
-    
-    
-//    mConvolutionManager[0].setImpulseResponse(impulseResponse, numSamples);
-//    mConvolutionManager[1].setImpulseResponse(impulseResponse, numSamples);
 }
 
 //==============================================================================
@@ -124,8 +113,6 @@ void RtconvolveAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
 
 void RtconvolveAudioProcessor::releaseResources()
 {
-    // When playback stops, you can use this as an opportunity to free up any
-    // spare memory, etc.
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -165,19 +152,25 @@ void RtconvolveAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     
     if (tryLock.isLocked())
     {
-        for (int channel = 0; channel < totalNumInputChannels; ++channel)
+        for (int channel = 0; channel < 1; ++channel)
         {
             float* channelData = buffer.getWritePointer (channel);
             mConvolutionManager[channel].processInput(channelData);
             const float* y = mConvolutionManager[channel].getOutputBuffer();
             memcpy(channelData, y, buffer.getNumSamples() * sizeof(float));
+            
+            if (buffer.getNumChannels() == 2)
+            {
+                float *channelDataR = buffer.getWritePointer(1);
+                const float* y = mConvolutionManager[0].getOutputBuffer();
+                memcpy(channelDataR, y, buffer.getNumSamples() * sizeof(float));
+            }
         }
     }
     else
     {
         buffer.clear();
     }
-    
 }
 
 //==============================================================================
@@ -194,15 +187,23 @@ AudioProcessorEditor* RtconvolveAudioProcessor::createEditor()
 //==============================================================================
 void RtconvolveAudioProcessor::getStateInformation (MemoryBlock& destData)
 {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
+    XmlElement xml("STATEINFO");
+    xml.setAttribute("impulseResponseFilePath", mImpulseResponseFilePath);
+    copyXmlToBinary(xml, destData);
 }
 
 void RtconvolveAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
+    juce::ScopedPointer<XmlElement> xml(getXmlFromBinary(data, sizeInBytes));
+
+    String impulseResponseFilePath = xml->getStringAttribute("impulseResponseFilePath", "");
+    juce::File ir(impulseResponseFilePath);
+    AudioFormatManager manager;
+    manager.registerBasicFormats();
+    juce::ScopedPointer<AudioFormatReader> formatReader = manager.createReaderFor(ir);
+    AudioSampleBuffer sampleBuffer(formatReader->numChannels, formatReader->lengthInSamples);
+    formatReader->read(&sampleBuffer, 0, formatReader->lengthInSamples, 0, 1, 1);
+    setImpulseResponse(sampleBuffer, impulseResponseFilePath);
 }
 
 //==============================================================================

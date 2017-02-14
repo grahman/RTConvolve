@@ -59,13 +59,14 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     //================= CUSTOM =======================
-    void setImpulseResponse(const AudioSampleBuffer& impulseResponseBuffer);
+    void setImpulseResponse(const AudioSampleBuffer& impulseResponseBuffer, const juce::String pathToImpulse = "");
 private:
 //    juce::ScopedPointer<ConvolutionManager<float> > mConvolutionManager[2];
     ConvolutionManager<float> mConvolutionManager[2];
     juce::CriticalSection mLoadingLock;
     float mSampleRate;
     int mBufferSize;
+    juce::String mImpulseResponseFilePath;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RtconvolveAudioProcessor)
 };

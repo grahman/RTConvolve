@@ -15,8 +15,8 @@
 #include "util/util.h"
 #include "util/SincFilter.hpp"
 
-static const int DEFAULT_NUM_SAMPLES = 1024;
-static const int DEFAULT_BUFFER_SIZE = 1024;
+static const int DEFAULT_NUM_SAMPLES = 512;
+static const int DEFAULT_BUFFER_SIZE = 512;
 
 template <typename FLOAT_TYPE>
 class ConvolutionManager
@@ -49,6 +49,12 @@ public:
         }
     }
     
+    /**
+     Perform one base time period's worth of work for the convolution.
+     @param input
+     The input is expected to hold a number of samples equal to the 'bufferSize'
+     specified in the constructor.
+     */
     void processInput(FLOAT_TYPE *input)
     {
         mUniformConvolver->processInput(input);
