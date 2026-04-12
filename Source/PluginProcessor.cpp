@@ -115,30 +115,11 @@ void RtconvolveAudioProcessor::releaseResources()
 {
 }
 
-#ifndef JucePlugin_PreferredChannelConfigurations
-bool RtconvolveAudioProcessor::setPreferredBusArrangement (bool isInput, int bus, const AudioChannelSet& preferredSet)
+bool RtconvolveAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
-    // Reject any bus arrangements that are not compatible with your plugin
-
-    const int numChannels = preferredSet.size();
-
-   #if JucePlugin_IsMidiEffect
-    if (numChannels != 0)
-        return false;
-   #elif JucePlugin_IsSynth
-    if (isInput || (numChannels != 1 && numChannels != 2))
-        return false;
-   #else
-    if (numChannels != 1 && numChannels != 2)
-        return false;
-
-    if (! AudioProcessor::setPreferredBusArrangement (! isInput, bus, preferredSet))
-        return false;
-   #endif
-
-    return AudioProcessor::setPreferredBusArrangement (isInput, bus, preferredSet);
+    const auto& main = layouts.getMainInputChannelSet();
+    return main == AudioChannelSet::mono() || main == AudioChannelSet::stereo();
 }
-#endif
 
 void RtconvolveAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
@@ -194,16 +175,19 @@ void RtconvolveAudioProcessor::getStateInformation (MemoryBlock& destData)
 
 void RtconvolveAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    juce::ScopedPointer<XmlElement> xml(getXmlFromBinary(data, sizeInBytes));
+    auto xml = getXmlFromBinary(data, sizeInBytes);
 
     String impulseResponseFilePath = xml->getStringAttribute("impulseResponseFilePath", "");
     juce::File ir(impulseResponseFilePath);
     AudioFormatManager manager;
     manager.registerBasicFormats();
-    juce::ScopedPointer<AudioFormatReader> formatReader = manager.createReaderFor(ir);
-    AudioSampleBuffer sampleBuffer(formatReader->numChannels, formatReader->lengthInSamples);
-    formatReader->read(&sampleBuffer, 0, formatReader->lengthInSamples, 0, 1, 1);
-    setImpulseResponse(sampleBuffer, impulseResponseFilePath);
+    std::unique_ptr<AudioFormatReader> formatReader{manager.createReaderFor(ir)};
+    if (formatReader)
+    {
+        AudioSampleBuffer sampleBuffer(formatReader->numChannels, (int)formatReader->lengthInSamples);
+        formatReader->read(&sampleBuffer, 0, (int)formatReader->lengthInSamples, 0, 1, 1);
+        setImpulseResponse(sampleBuffer, impulseResponseFilePath);
+    }
 }
 
 //==============================================================================

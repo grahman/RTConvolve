@@ -2,14 +2,15 @@
 
 <JUCERPROJECT id="NA30hd" name="RTConvolve" projectType="audioplug" version="1.0.0"
               bundleIdentifier="com.grahambarab.RTConvolve" includeBinaryInAppConfig="1"
-              buildVST="1" buildVST3="0" buildAU="1" buildAUv3="0" buildRTAS="0"
-              buildAAX="0" pluginName="RTConvolve" pluginDesc="RTConvolve"
+              buildRTAS="0" pluginName="RTConvolve" pluginDesc="RTConvolve"
               pluginManufacturer="Graham Barab" pluginManufacturerCode="Gmbp"
               pluginCode="Na30" pluginChannelConfigs="" pluginIsSynth="0" pluginWantsMidiIn="0"
               pluginProducesMidiOut="0" pluginIsMidiEffectPlugin="0" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="RTConvolveAU" pluginRTASCategory="" aaxIdentifier="com.yourcompany.RTConvolve"
-              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="4.2.1"
-              companyName="Graham Barab" companyEmail="gbarab@mac.com">
+              pluginAAXCategory="2" jucerFormatVersion="1" companyName="Graham Barab"
+              companyEmail="gbarab@mac.com" pluginFormats="buildAU,buildVST3"
+              buildVST="0" buildVST3="1" buildAU="1" buildAUv3="0" buildAAX="0"
+              buildStandalone="0" enableIAA="0">
   <MAINGROUP id="DVarFc" name="RTConvolve">
     <GROUP id="{8AB72BF0-87C2-C06B-9A1E-813F344409E9}" name="Source">
       <GROUP id="{A0087A0F-B078-F58F-1EE3-676B89D2DA76}" name="util">
@@ -20,8 +21,6 @@
       </GROUP>
       <FILE id="PQt2qa" name="ConvolutionManager.h" compile="0" resource="0"
             file="Source/ConvolutionManager.h"/>
-      <FILE id="V8ZSXH" name="RefCountedAudioBuffer.h" compile="0" resource="0"
-            file="Source/RefCountedAudioBuffer.h"/>
       <FILE id="Gyh5bG" name="TimeDistributedFFTConvolver.h" compile="0"
             resource="0" file="Source/TimeDistributedFFTConvolver.h"/>
       <FILE id="eXGxAV" name="TimeDistributedFFTConvolver.hpp" compile="0"
@@ -46,38 +45,63 @@
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="RTConvolve"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_core" path="../../src/JUCE/modules"/>
-        <MODULEPATH id="juce_events" path="../../src/JUCE/modules"/>
-        <MODULEPATH id="juce_graphics" path="../../src/JUCE/modules"/>
-        <MODULEPATH id="juce_data_structures" path="../../src/JUCE/modules"/>
-        <MODULEPATH id="juce_gui_basics" path="../../src/JUCE/modules"/>
-        <MODULEPATH id="juce_gui_extra" path="../../src/JUCE/modules"/>
-        <MODULEPATH id="juce_cryptography" path="../../src/JUCE/modules"/>
-        <MODULEPATH id="juce_video" path="../../src/JUCE/modules"/>
-        <MODULEPATH id="juce_opengl" path="../../src/JUCE/modules"/>
-        <MODULEPATH id="juce_audio_basics" path="../../src/JUCE/modules"/>
-        <MODULEPATH id="juce_audio_devices" path="../../src/JUCE/modules"/>
-        <MODULEPATH id="juce_audio_formats" path="../../src/JUCE/modules"/>
-        <MODULEPATH id="juce_audio_processors" path="../../src/JUCE/modules"/>
-        <MODULEPATH id="juce_audio_plugin_client" path="../../src/JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="/Users/grahambarab/Downloads/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="/Users/grahambarab/Downloads/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="/Users/grahambarab/Downloads/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="/Users/grahambarab/Downloads/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="/Users/grahambarab/Downloads/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="/Users/grahambarab/Downloads/JUCE/modules"/>
+        <MODULEPATH id="juce_cryptography" path="/Users/grahambarab/Downloads/JUCE/modules"/>
+        <MODULEPATH id="juce_video" path="/Users/grahambarab/Downloads/JUCE/modules"/>
+        <MODULEPATH id="juce_opengl" path="/Users/grahambarab/Downloads/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="/Users/grahambarab/Downloads/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="/Users/grahambarab/Downloads/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="/Users/grahambarab/Downloads/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="/Users/grahambarab/Downloads/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="/Users/grahambarab/Downloads/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../../../Downloads/JUCE/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
+    <VS2022 targetFolder="Builds/VisualStudio2022">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug"/>
+        <CONFIGURATION isDebug="0" name="Release"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="C:/juce/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="C:/juce/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="C:/juce/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="C:/juce/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="C:/juce/modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="C:/juce/modules"/>
+        <MODULEPATH id="juce_core" path="C:/juce/modules"/>
+        <MODULEPATH id="juce_cryptography" path="C:/juce/modules"/>
+        <MODULEPATH id="juce_data_structures" path="C:/juce/modules"/>
+        <MODULEPATH id="juce_events" path="C:/juce/modules"/>
+        <MODULEPATH id="juce_graphics" path="C:/juce/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="C:/juce/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="C:/juce/modules"/>
+        <MODULEPATH id="juce_opengl" path="C:/juce/modules"/>
+        <MODULEPATH id="juce_video" path="C:/juce/modules"/>
+      </MODULEPATHS>
+    </VS2022>
   </EXPORTFORMATS>
   <MODULES>
-    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_video" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors_headless" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_video" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
   </MODULES>
-  <JUCEOPTIONS JUCE_QUICKTIME="disabled"/>
+  <JUCEOPTIONS JUCE_QUICKTIME="disabled" JUCE_VST3_CAN_REPLACE_VST2="0"/>
 </JUCERPROJECT>

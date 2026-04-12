@@ -5,13 +5,35 @@
 //  Created by Graham Barab on 2/6/17.
 //
 //
+// MIT License
+//
+// Copyright (c) 2026 Graham Barab
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
 #ifndef TimeDistributedFFTConvolver_h
 #define TimeDistributedFFTConvolver_h
 
-#include "../JuceLibraryCode/JuceHeader.h"
-#include "RefCountedAudioBuffer.h"
+#include "util/DynamicArray.h"
 
+#include <memory>
+#include <vector>
 
 /**
  The TimeDistributedFFTConvolver class computes the convolution of 
@@ -51,7 +73,7 @@ public:
      @param bufferSize
         The host audio application's audio buffer size, or 'base time period'.
      */
-    TimeDistributedFFTConvolver(FLOAT_TYPE *impulseResponse, int numSamplesImpulseResponse, int bufferSize);
+    TimeDistributedFFTConvolver(FLOAT_TYPE *impulseResponse, size_t numSamplesImpulseResponse, int bufferSize);
     
     /**
      Perform one base time period's worth of work for the convolution. The convolved
@@ -71,22 +93,25 @@ public:
     const FLOAT_TYPE *getOutputBuffer() const
     {
         int startIndex = mCurrentPhase * mNumSamplesBaseTimePeriod;
-        return mOutputReal->getReadPointer(0) + startIndex;
+        return mOutputReal.data() + startIndex;
     }
     
 private:
     int mNumSamplesBaseTimePeriod;
-    juce::ReferenceCountedObjectPtr<RefCountedAudioBuffer<FLOAT_TYPE> > mBuffersReal[3];
-    juce::ReferenceCountedObjectPtr<RefCountedAudioBuffer<FLOAT_TYPE> > mBuffersImag[3];
-    juce::OwnedArray<juce::AudioBuffer<FLOAT_TYPE> > mImpulsePartitionsReal;
-    juce::OwnedArray<juce::AudioBuffer<FLOAT_TYPE> > mImpulsePartitionsImag;
-    juce::OwnedArray<juce::AudioBuffer<FLOAT_TYPE> > mInputReal;
-    juce::OwnedArray<juce::AudioBuffer<FLOAT_TYPE> > mInputImag;
-    juce::ScopedPointer<juce::AudioBuffer<FLOAT_TYPE> > mOutputReal;
-    juce::ScopedPointer<juce::AudioBuffer<FLOAT_TYPE> > mOutputImag;
-    juce::ScopedPointer<juce::AudioBuffer<FLOAT_TYPE> > mPreviousTail;
+    
+    using SampleBuffer = DynamicArray<FLOAT_TYPE>;
+    
+    std::shared_ptr<SampleBuffer> mBuffersReal[3];
+    std::shared_ptr<SampleBuffer> mBuffersImag[3];
+    std::vector<SampleBuffer> mImpulsePartitionsReal;
+    std::vector<SampleBuffer> mImpulsePartitionsImag;
+    std::vector<SampleBuffer> mInputReal;
+    std::vector<SampleBuffer> mInputImag;
+    SampleBuffer mOutputReal;
+    SampleBuffer mOutputImag;
+    SampleBuffer mPreviousTail;
 
-    int mNumPartitions;
+    size_t mNumPartitions;
     int mCurrentPhase;
     int mCurrentInputIndex;
     
@@ -107,7 +132,7 @@ private:
         3 - Perform decomposition for 4th quarter of the non-pad input (first half of input buffer) <br />
         Parameter must be one of these four values, or an exception will be thrown.
      */
-    void forwardDecomposition(FLOAT_TYPE *rex, FLOAT_TYPE *imx, int N, int whichQuarter);
+    void forwardDecomposition(FLOAT_TYPE *rex, FLOAT_TYPE *imx, size_t N, int whichQuarter);
     
     /**
      Convenience function to perform the forward decomposition work for all four quarters
@@ -121,7 +146,7 @@ private:
      The length (in samples) of the input. The last N/2 samples are assumed to be
      a padding of zeros.
      */
-    void forwardDecompositionComplete(FLOAT_TYPE *rex, FLOAT_TYPE *imx, int N);
+    void forwardDecompositionComplete(FLOAT_TYPE *rex, FLOAT_TYPE *imx, size_t N);
     
     /**
      Perform the 'decimation in frequency' inverse decomposotition work for a quarter of the input.
@@ -140,7 +165,7 @@ private:
      3 - Perform decomposition for 4th quarter of the non-pad input (first half of input buffer) <br />
      Parameter must be one of these four values, or an exception will be thrown.
      */
-    void inverseDecomposition(FLOAT_TYPE *rex, FLOAT_TYPE *imx, int N, int whichQuarter);
+    void inverseDecomposition(FLOAT_TYPE *rex, FLOAT_TYPE *imx, size_t N, int whichQuarter);
     
     /**
      Convenience function to perform the inverse decomposition work for all four quarters
@@ -154,7 +179,7 @@ private:
      The length (in samples) of the input. The last N/2 samples are assumed to be
      a padding of zeros.
      */
-    void inverseDecompositionComplete(FLOAT_TYPE *rex, FLOAT_TYPE *imx, int N);
+    void inverseDecompositionComplete(FLOAT_TYPE *rex, FLOAT_TYPE *imx, size_t N);
     
     /**
      Computes complex multiplications in the frequency domain for half of a sub-fft's
@@ -183,7 +208,7 @@ private:
      Custom version of the fast fourier transform in which the frequency bins of the output are arranged
      in the order needed for frequency domain convolution implemented by this class.
      */
-    void fft_priv(FLOAT_TYPE *rex, FLOAT_TYPE *imx, FLOAT_TYPE *trx, FLOAT_TYPE *tix, int N);
+    void fft_priv(FLOAT_TYPE *rex, FLOAT_TYPE *imx, FLOAT_TYPE *trx, FLOAT_TYPE *tix, size_t N);
 };
 
 #include "TimeDistributedFFTConvolver.hpp"

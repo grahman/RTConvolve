@@ -37,19 +37,23 @@ RtconvolveAudioProcessorEditor::~RtconvolveAudioProcessorEditor()
 
 void RtconvolveAudioProcessorEditor::buttonClicked(juce::Button* b)
 {
-    FileChooser fchooser("Select Impulse Response");
-    if (fchooser.browseForFileToOpen())
-    {
-        File ir = fchooser.getResult();
-        FileInputStream irInputStream(ir);
-        AudioFormatManager manager;
-        manager.registerBasicFormats();
-        juce::ScopedPointer<AudioFormatReader> formatReader = manager.createReaderFor(ir);
-        AudioSampleBuffer sampleBuffer(formatReader->numChannels, formatReader->lengthInSamples);
-        formatReader->read(&sampleBuffer, 0, formatReader->lengthInSamples, 0, 1, 1);
-        
-        processor.setImpulseResponse(sampleBuffer, ir.getFullPathName());
-    }
+    mFileChooser = std::make_unique<FileChooser>("Select Impulse Response");
+    mFileChooser->launchAsync(FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles,
+        [this](const FileChooser& chooser)
+        {
+            auto results = chooser.getResults();
+            if (results.isEmpty()) return;
+
+            File ir = results[0];
+            AudioFormatManager manager;
+            manager.registerBasicFormats();
+
+            auto formatReader = std::unique_ptr<AudioFormatReader>{manager.createReaderFor(ir)};
+            AudioSampleBuffer sampleBuffer(formatReader->numChannels, (int)formatReader->lengthInSamples);
+            formatReader->read(&sampleBuffer, 0, (int)formatReader->lengthInSamples, 0, 1, 1);
+
+            processor.setImpulseResponse(sampleBuffer, ir.getFullPathName());
+        });
 }
 
 //==============================================================================

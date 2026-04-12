@@ -1,5 +1,27 @@
 /* Adapted from Stephen Smith's algorithm (www.dspguide.com) */
 
+// MIT License
+//
+// Copyright (c) 2026 Graham Barab
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #ifndef __FFT__
 #define __FFT__
 
@@ -9,25 +31,27 @@
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
-static double log2( double n )  
+#endif
+#include <cmath>
+
+inline double _log2( double n )
 {  
     // log(n)/log(2) is log2.  
     return log( n ) / log( 2 );  
 }
-#endif
-#include <cmath>
+
 template <typename T>
-void fft(T *REX, T *IMX, unsigned int N)
+void fft(T *REX, T *IMX, size_t N)
 {
-	const unsigned int NM1 = N - 1;
-	const unsigned int ND2 = N / 2;
-	const unsigned int M = (unsigned int)log2((float)N);
-	unsigned int k;
-	unsigned int LE, LE2;
-	unsigned int IP;
-	int j = ND2;
-	int i, l;	/* Loop counters */
-	int jm1;
+	const size_t NM1 = N - 1;
+	const size_t ND2 = N / 2;
+	const size_t M = (size_t)_log2((float)N);
+	size_t k;
+	size_t LE, LE2;
+	size_t IP;
+	size_t j = ND2;
+	size_t i, l;	/* Loop counters */
+	size_t jm1;
 	T TR, TI, UR, UI, SR, SI;
 
 	/* Bit reversal sorting */
